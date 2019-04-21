@@ -11,11 +11,19 @@ function run(arg)
 	sock_sendline(sock, domain)
 	x = sock_recvline_regex(sock, "^whois: ")
 	server = x:match("%s%a.+"):sub(2,-2)
+	if last_err() then
+		error("Couldn't reach IANA whois server")
+		return
+	end
 
 	--Querying TLD WHOIS
 	sock = sock_connect(server, 43)
 	sock_sendline(sock, domain)
 	data = sock_recvall(sock)
+	if last_err() then
+		error("Couldn't reach TLD whois server")
+		return
+	end
 
 	--check for registrar WHOIS
 	registrarWhois = data:match("Registrar WHOIS Server: (%g+)%G")
@@ -26,6 +34,8 @@ function run(arg)
 		registrarData = sock_recvall(sock)
 		if registrarData ~= "" then
 			data = registrarData
+		else
+			error("Registrar whois query failed")
 		end
 	end
 	for w in data:gmatch("%S+") do
