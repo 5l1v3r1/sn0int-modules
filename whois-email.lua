@@ -7,7 +7,7 @@ function run(arg)
 	domain = arg['value']
 
 	-- Get Whois server for domain querying whois.iana.org
-	sock = sock_connect("whois.iana.org", 43)
+	sock = sock_connect("whois.iana.org", 43, {})
 	sock_sendline(sock, domain)
 	x = sock_recvline_regex(sock, "^whois: ")
 	server = x:match("%s%a.+"):sub(2,-2)
@@ -17,7 +17,7 @@ function run(arg)
 	end
 
 	--Querying TLD WHOIS
-	sock = sock_connect(server, 43)
+	sock = sock_connect(server, 43, {})
 	sock_sendline(sock, domain)
 	data = sock_recvall(sock)
 	if last_err() then
@@ -29,7 +29,7 @@ function run(arg)
 	registrarWhois = data:match("Registrar WHOIS Server: (%g+)%G")
 	if registrarWhois ~= nil then
 		--got registrat WHOIS, querying
-		sock = sock_connect(registrarWhois, 43)
+		sock = sock_connect(registrarWhois, 43, {})
 		sock_send(sock, domain.."\r\n")
 		registrarData = sock_recvall(sock)
 		if registrarData ~= "" then
